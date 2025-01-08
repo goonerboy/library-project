@@ -1,0 +1,20 @@
+# Используем официальный образ PHP с Apache
+FROM php:8.1-apache
+
+# Включаем mod_rewrite для Apache (это может быть нужно для вашего проекта)
+RUN a2enmod rewrite
+
+# Копируем проект в контейнер
+COPY ./ /var/www/html/
+
+# Устанавливаем необходимые PHP-расширения (например, для работы с MySQL)
+RUN docker-php-ext-install pdo pdo_mysql
+
+# Открываем порт 80 для веб-сервера Apache
+EXPOSE 80
+
+# Устанавливаем рабочую директорию
+WORKDIR /var/www/html
+
+# Запускаем Apache в фоне
+CMD ["apache2-foreground"]
