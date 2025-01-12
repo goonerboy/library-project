@@ -1,21 +1,29 @@
 version: '3.8'
 
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  web:
+    image: my-php-app
     ports:
-      - "5556:80"
-    volumes:
-      - ./:/var/www/html
+      - "8081:80"
+    depends_on:
+      - db
     environment:
-      MYSQL_HOST: db
-      MYSQL_USER: root
-      MYSQL_PASSWORD: example
+      - DB_HOST=db  # db - это имя контейнера PostgreSQL
+      - DB_USER=postgres
+      - DB_PASSWORD=123
+      - DB_NAME=library_system
+    networks:
+      - mynetwork
+
   db:
-    image: mysql:5.7
+    image: postgres:13
     environment:
-      MYSQL_ROOT_PASSWORD: example
-    ports:
-      - "3306:3306"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: library_system
+      LANG: en_US.UTF-8   # Указываем кодировку UTF-8
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:  # Сеть для взаимодействия контейнеров

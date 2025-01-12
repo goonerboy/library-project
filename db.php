@@ -1,14 +1,15 @@
 <?php
-$servername = "localhost";
-$username = "root"; // по умолчанию XAMPP использует 'root'
-$password = ""; // по умолчанию нет пароля
-$dbname = "library_system"; // имя базы данных
+session_start();
 
-// Создание подключения
-$conn = new mysqli($servername, $username, $password, $dbname);
+$servername = "db";  // имя контейнера PostgreSQL в сети Docker
+$username = "postgres";
+$password = "123";  
+$dbname = "library_system";
 
-// Проверка соединения
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+// Подключение к базе данных PostgreSQL
+$conn = pg_connect("host=$servername dbname=$dbname user=$username password=$password");
+
+if (!$conn) {
+    die("Connection failed: " . pg_last_error());
 }
 ?>

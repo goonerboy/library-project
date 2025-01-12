@@ -2,15 +2,13 @@
 session_start();
 include 'db.php';
 
-// Проверка на авторизацию
 if (!isset($_SESSION['username'])) {
     header("Location: login.php");
     exit;
 }
 
-// Запрос на получение всех книг
-$sql = "SELECT id, title, author, year FROM books WHERE title != '' AND author != '' AND year != ''"; // Убираем пустые записи
-$result = $conn->query($sql);
+$sql = "SELECT id, title, author, year FROM books";
+$result = pg_query($conn, $sql);
 ?>
 
 <!DOCTYPE html>
@@ -23,19 +21,16 @@ $result = $conn->query($sql);
 </head>
 <body>
     <header>
-        <h1>Available Books</h1>
-        <p>Welcome, <?php echo $_SESSION['username']; ?>!</p>
+        <h1>Welcome, <?php echo $_SESSION['username']; ?>!</h1>
         <a href="logout.php">Logout</a>
     </header>
 
     <main>
         <h2>Books in the Library</h2>
-
         <?php
-        if ($result->num_rows > 0) {
+        if (pg_num_rows($result) > 0) {
             echo '<div class="books-container">';
-            // Выводим данные каждой книги
-            while ($row = $result->fetch_assoc()) {
+            while ($row = pg_fetch_assoc($result)) {
                 echo "<div class='book-card'>";
                 echo "<h3>" . $row["title"] . "</h3>";
                 echo "<p><strong>Author:</strong> " . $row["author"] . "</p>";
@@ -44,7 +39,7 @@ $result = $conn->query($sql);
             }
             echo '</div>';
         } else {
-            echo "<p>No books found in the library.</p>";
+            echo "<p>No books found.</p>";
         }
         ?>
 
@@ -63,25 +58,21 @@ $result = $conn->query($sql);
         </form>
 
         <?php
-        // Обработка добавления книги
         if (isset($_POST['submit'])) {
             $title = $_POST['title'];
             $author = $_POST['author'];
             $year = $_POST['year'];
 
-            // Вставка новой книги в базу данных
-            $sql_insert = "INSERT INTO books (title, author, year) VALUES ('$title', '$author', '$year')";
-
-            if ($conn->query($sql_insert) === TRUE) {
-                echo "<p>New book added successfully!</p>";
-                // Перезагружаем страницу, чтобы увидеть добавленную книгу
+            $sql_insert = "INSERT INTO books (title, author, year) VALUES ($1, $2, $3)";
+            if (pg_query_params($conn, $sql_insert, array($title, $author, $year))) {
+                echo "<p>New book added!</p>";
                 header("Location: books.php");
             } else {
-                echo "Error: " . $sql_insert . "<br>" . $conn->error;
+                echo "Error: " . pg_last_error($conn);
             }
         }
 
-        $conn->close();
+        pg_close($conn);
         ?>
     </main>
 </body>
