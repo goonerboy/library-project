@@ -1,39 +1,53 @@
 pipeline {
-    agent any
+    agent any  
+
+    environment {
+        
+        DB_HOST = 'postgres'  
+        DB_USER = 'postgres'
+        DB_PASSWORD = '123'
+        DB_NAME = 'library_system'
+    }
 
     stages {
         stage('Build') {
             steps {
-                script {
-                    // Команды для сборки твоего проекта
-                    echo 'Building project...'
-                }
+                echo 'Building the application...'
+              
+                sh './gradlew clean build'
             }
         }
+
         stage('Test') {
             steps {
-                script {
-                    // Команды для тестирования проекта
-                    echo 'Running tests...'
-                }
+                echo 'Running tests...'
+               
+                sh './gradlew test'
             }
         }
+
+        stage('Docker Build') {
+            steps {
+                echo 'Building Docker image...'
+               
+                sh 'docker-compose build'
+            }
+        }
+
         stage('Deploy') {
             steps {
-                script {
-                    // Команды для деплоя проекта
-                    echo 'Deploying project...'
-                }
+                echo 'Deploying the application...'
+          
+                sh 'docker-compose up -d'
             }
         }
     }
 
     post {
-        success {
-            echo 'Build and deploy completed successfully!'
-        }
-        failure {
-            echo 'Build or deploy failed!'
+      
+        always {
+            echo 'Cleaning up...'
+         
         }
     }
 }

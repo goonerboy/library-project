@@ -6,7 +6,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    // Подготовленный запрос для предотвращения SQL-инъекций
+    
     $sql = "SELECT * FROM users WHERE username=$1";
     $result = pg_query_params($conn, $sql, array($username));
 
